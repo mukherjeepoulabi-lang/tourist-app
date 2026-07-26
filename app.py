@@ -4,7 +4,7 @@ from streamlit_js_eval import get_geolocation
 
 # অ্যাপের কনফিগারেশন ও টাইটেল
 st.set_page_config(page_title="স্মার্ট ট্যুরিস্ট গাইড", page_icon="🗺️", layout="centered")
-st.title("🗺️ স্মার্ট ট্যুরিস্ট অ্যাসিস্ট্যান্ট অ্যাপ")
+st.title("🗺️ SMART TOURIST ASSISTANT")
 st.write("আপনার লাইভ লোকেশনের আবহাওয়া এবং আশেপাশের প্রয়োজনীয় জরুরি সেবাগুলো দেখুন।")
 
 # ১. ব্রাউজার থেকে লাইভ GPS লোকেশন নেওয়া
@@ -16,22 +16,17 @@ if location:
     
     st.success("📍 আপনার লাইভ লোকেশন পাওয়া গেছে!")
     
-    # ২. লাইভ আবহাওয়া সেকশন (সরাসরি GPS দিয়ে ওপেন-মেটিও এপিআই)
+    # ২. লাইভ আবহাওয়া সেকশন (সরাসরি Open-Meteo API)
     st.subheader("🌦️ আপনার এলাকার লাইভ আবহাওয়া")
     try:
-        # ব্রাউজারের জিপিএস ডাটা সরাসরি এই লিংকে পাঠিয়ে আবহাওয়ার তথ্য আনা হচ্ছে
-        weather_url = f"https://open-meteo.com{lat}&longitude={lon}&current_weather=true&relative_humidity_2m=true"
+        weather_url = f"https://open-meteo.com{lat}&longitude={lon}&current_weather=true"
         response = requests.get(weather_url).json()
         current = response['current_weather']
         
-        col1, col2, col3 = st.columns(3)
-        col1.metric("तापमात्र (Temperature)", f"{current['temperature']}°C")
+        # স্ক্রিনে তাপমাত্রা ও বাতাসের গতি দেখানো
+        col1, col2 = st.columns(2)
+        col1.metric("তাপমাত্রা (Temperature)", f"{current['temperature']}°C")
         col2.metric("বাতাসের গতি (Wind Speed)", f"{current['windspeed']} km/h")
-        
-        # আবহাওয়ার সাধারণ অবস্থা বোঝানোর কোড
-        w_code = current['weathercode']
-        status = "স্বচ্ছ আকাশ" if w_code == 0 else "আংশিক মেঘলা" if w_code in [1,2,3] else "বৃষ্টির সম্ভাবনা" if w_code > 50 else "স্বাভাবিক"
-        col3.metric("আবহাওয়ার অবস্থা", status)
         
     except Exception as e:
         st.error("আবহাওয়া তথ্য লোড করা যায়নি। অনুগ্রহ করে পেজটি একবার রিফ্রেশ (Refresh) করুন।")
@@ -43,6 +38,7 @@ if location:
     def get_maps_url(query):
         return f"https://google.com{query}&location={lat},{lon}"
     
+    # বোতাম বা বাটন তৈরি
     col_a, col_b = st.columns(2)
     with col_a:
         st.link_button("🏥 হাসপাতাল (Hospital)", get_maps_url("hospital"))
