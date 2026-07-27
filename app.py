@@ -19,7 +19,7 @@ try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     
     # এখানে লিঙ্কটি সম্পূর্ণ নিখুঁত করা হয়েছে
-    weather_url = f"https://open-meteo.com{lat}&longitude={lon}&current_weather=true"
+    weather_url = f"https://api.open-meteo.com{lat}&longitude={lon}&current_weather=true"
     
     response = requests.get(weather_url, headers=headers, timeout=10)
     
