@@ -34,7 +34,7 @@ except Exception as e:
     st.error(f"আবহাওয়া তথ্য লোড করা যায়নি। সমস্যা: {str(e)}")
 
 def get_maps_url(service_type):
-    return f"https://google.com{service_type}/@{lat},{lon}"
+    return f"https://www.google.com/maps/search/{service_type}/@{lat},{lon}"
 
 st.markdown("### 🔍 আপনার কাছের জরুরি সেবাসমূহ")
 st.write("নিচের বোতামগুলোতে ক্লিক করলে আপনার সবচেয়ে কাছের স্থানটি সরাসরি Google Maps-এ ওপেন হবে:")
