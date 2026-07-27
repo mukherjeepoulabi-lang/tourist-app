@@ -15,7 +15,7 @@ st.markdown("### 🌦️ আপনার এলাকার লাইভ আব�
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     # এই লিঙ্কটি সম্পূর্ণ নিখুঁত এবং ফিক্সড
-    weather_url = https://api.open-meteo.com{lat}&longitude={lon}&current_weather=true"
+    weather_url =f"https://api.open-meteo.com{lat}&longitude={lon}&current_weather=true"
     
     response = requests.get(weather_url, headers=headers, timeout=10)
     
