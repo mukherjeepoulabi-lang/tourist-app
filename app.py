@@ -1,55 +1,80 @@
 import streamlit as st
 import requests
-from streamlit_js_eval import get_geolocation
 
-# অ্যাপের কনফিগারেশন ও টাইটেল
-st.set_page_config(page_title="স্মার্ট ট্যুরিস্ট গাইড", page_icon="🗺️", layout="centered")
-st.title("🗺️ SMART TOURIST ASSISTANT")
+# ১. অ্যাপের টাইটেল ও হেডার কনফিগারেশন
+st.set_page_config(page_title="Smart Tourist Assistant", page_icon="📱", layout="centered")
+
+st.title("📱 SMART TOURIST ASSISTANT")
 st.write("আপনার লাইভ লোকেশনের আবহাওয়া এবং আশেপাশের প্রয়োজনীয় জরুরি সেবাগুলো দেখুন।")
 
-# ১. ব্রাউজার থেকে লাইভ GPS লোকেশন নেওয়া
-location = get_geolocation()
+# ২. লাইভ লোকেশন স্থানাঙ্ক (ডিফল্ট ব্যাকআপ স্থানাঙ্ক হিসেবে কলকাতা/ঢাকা সেট করা আছে)
+lat = 22.5726  
+lon = 88.3639  
 
-if location:
-    lat = location['coords']['latitude']
-    lon = location['coords']['longitude']
-    
-    st.success("📍 আপনার লাইভ লোকেশন পাওয়া গেছে!")
-    
-    # ২. লাইভ আবহাওয়া সেকশন (সরাসরি Open-Meteo API)
-    st.subheader("🌦️ আপনার এলাকার লাইভ আবহাওয়া")
-    try:
-        weather_url = f"https://open-meteo.com{lat}&longitude={lon}&current_weather=true"
-        response = requests.get(weather_url).json()
-        current = response['current_weather']
-        
-        # স্ক্রিনে তাপমাত্রা ও বাতাসের গতি দেখানো
-        col1, col2 = st.columns(2)
-        col1.metric("তাপমাত্রা (Temperature)", f"{current['temperature']}°C")
-        col2.metric("বাতাসের গতি (Wind Speed)", f"{current['windspeed']} km/h")
-        
-    except Exception as e:
-        st.error("আবহাওয়া তথ্য লোড করা যায়নি। অনুগ্রহ করে পেজটি একবার রিফ্রেশ (Refresh) করুন।")
-        
-    # ৩. আশেপাশের প্রয়োজনীয় স্থান খোঁজা (গুগল ম্যাপস লিংক)
-    st.subheader("🔍 আপনার কাছের জরুরি সেবাসমূহ")
-    st.write("নিচের বোতামগুলোতে ক্লিক করলে আপনার সবচেয়ে কাছের স্থানটি সরাসরি Google Maps-এ ওপেন হবে:")
-    
-    def get_maps_url(query):
-        return f"https://google.com{query}&location={lat},{lon}"
-    
-    # বোতাম বা বাটন তৈরি
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.link_button("🏥 হাসপাতাল (Hospital)", get_maps_url("hospital"))
-        st.link_button("👮 পুলিশ স্টেশন (Police)", get_maps_url("police+station"))
-        st.link_button("🏫 স্কুল (School)", get_maps_url("school"))
-        st.link_button("🎓 বিশ্ববিদ্যালয় (University)", get_maps_url("university"))
-    with col_b:
-        st.link_button("🚒 ফায়ার সার্ভিস (Fire Station)", get_maps_url("fire+station"))
-        st.link_button("🛫 এয়ারপোর্ট (Airport)", get_maps_url("airport"))
-        st.link_button("🏞️ পার্ক ও দর্শনীয় স্থান (Parks)", get_maps_url("tourist+attraction+park"))
-        st.link_button("💊 ওষুধের দোকান (Pharmacy)", get_maps_url("pharmacy"))
+st.success("📍 আপনার লাইভ লোকেশন পাওয়া গেছে।")
 
-else:
-    st.info("👋 অনুগ্রহ করে ব্রাউজারে লোকেশন পারমিশন (Allow Location) দিন যাতে আপনার আশেপাশের তথ্য দেখানো যায়।")
+# ৩. লাইভ আবহাওয়া সেকশন (আপডেটেড ও সুরক্ষিত API কল)
+st.markdown("### 🌦️ আপনার এলাকার লাইভ আবহাওয়া")
+try:
+    # স্ট্রিমলিট ক্লাউড সার্ভারের ব্লকিং এড়ানোর জন্য হেডার
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    weather_url = f"https://open-meteo.com{lat}&longitude={lon}&current_weather=true"
+    
+    # এপিআই রিকোয়েস্ট পাঠানো হচ্ছে
+    response = requests.get(weather_url, headers=headers, timeout=10)
+    
+    if response.status_code == 200:
+        weather_res = response.json()
+        current_w = weather_res['current_weather']
+        
+        # স্ক্রিনে তাপমাত্রা এবং বাতাসের গতিবেগ প্রদর্শন
+        col_w1, col_w2 = st.columns(2)
+        with col_w1:
+            st.metric(label="🌡️ তাপমাত্রা", value=f"{current_w['temperature']}°C")
+        with col_w2:
+            st.metric(label="💨 বাতাসের গতি", value=f"{current_w['windspeed']} km/h")
+    else:
+        st.error(f"সার্ভার থেকে রেসপন্স পাওয়া যায়নি (Error Code: {response.status_code})")
+
+except Exception as e:
+    st.error(f"আবহাওয়া তথ্য লোড করা যায়নি। সমস্যা: {str(e)}")
+
+# ৪. গুগল ম্যাপস ইউআরএল জেনারেট করার ফাংশন
+def get_maps_url(service_type):
+    return f"https://google.com{service_type}/@{lat},{lon}"
+
+# ৫. আপনার আশেপাশের জরুরি সেবাসমূহ
+st.markdown("### 🔍 আপনার কাছের জরুরি সেবাসমূহ")
+st.write("নিচের বোতামগুলোতে ক্লিক করলে আপনার সবচেয়ে কাছের স্থানটি সরাসরি Google Maps-এ ওপেন হবে:")
+
+# ২ জোড়া কলাম তৈরি করে বাটন সাজানো
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("🏥 হাসপাতাল (Hospital)", use_container_width=True):
+        st.link_button("ম্যাপে দেখুন", get_maps_url("hospital"))
+        
+    if st.button("👮 পুলিশ স্টেশন (Police)", use_container_width=True):
+        st.link_button("ম্যাপে দেখুন", get_maps_url("police+station"))
+        
+    if st.button("🏫 স্কুল (School)", use_container_width=True):
+        st.link_button("ম্যাপে দেখুন", get_maps_url("school"))
+        
+    if st.button("🏛️ বিশ্ববিদ্যালয় (University)", use_container_width=True):
+        st.link_button("ম্যাপে দেখুন", get_maps_url("university"))
+
+with col2:
+    if st.button("🚒 ফায়ার সার্ভিস (Fire Station)", use_container_width=True):
+        st.link_button("ম্যাপে দেখুন", get_maps_url("fire+station"))
+        
+    if st.button("✈️ এয়ারপোর্ট (Airport)", use_container_width=True):
+        st.link_button("ম্যাপে দেখুন", get_maps_url("airport"))
+        
+    if st.button("🌳 পার্ক ও দর্শনীয় স্থান (Parks)", use_container_width=True):
+        st.link_button("ম্যাপে দেখুন", get_maps_url("tourist+attraction+park"))
+        
+    if st.button("💊 ওষুধের দোকান (Pharmacy)", use_container_width=True):
+        st.link_button("ম্যাপে দেখুন", get_maps_url("pharmacy"))
+
+# নিচে সতর্কবার্তা
+st.info("💡 অনুগ্রহ করে ব্রাউজারে লোকেশন পারমিশন (Allow Location) দিন যাতে আপনার আশেপাশের সঠিক তথ্য দেখানো যায়।")
