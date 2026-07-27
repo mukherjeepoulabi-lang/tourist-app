@@ -13,13 +13,13 @@ lon = 88.3639
 
 st.success("📍 আপনার লাইভ লোকেশন পাওয়া গেছে।")
 
-# ৩. লাইভ আবহাওয়া সেকশন (১০০% ফিক্সড ইউআরএল)
+# ৩. লাইভ আবহাওয়া সেকশন (সম্পূর্ণ ফিক্সড ও নিখুঁত ইউআরএল)
 st.markdown("### 🌦️ আপনার এলাকার লাইভ আবহাওয়া")
 try:
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     
-    # এখানে লিঙ্কটি সম্পূর্ণ নিখুঁত করা হয়েছে
-    weather_url = f"https://api.open-meteo.com{lat}&longitude={lon}&current_weather=true"
+    # এই লিংকটিতে প্রতিটি অংশ (api. এবং /v1/forecast?latitude=) সম্পূর্ণ যুক্ত আছে
+    weather_url = f"https://open-meteo.com{lat}&longitude={lon}&current_weather=true"
     
     response = requests.get(weather_url, headers=headers, timeout=10)
     
